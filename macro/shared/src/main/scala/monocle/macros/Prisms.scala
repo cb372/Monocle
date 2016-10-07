@@ -27,16 +27,21 @@ private[macros] class PrismsImpl(val c: blackbox.Context) {
       *
       * I'm pretty confident it would be fixed by Miles's fix for SI-7046 (https://github.com/scala/scala/pull/5284)
       */
-    def findSubclasses(typeName: TypeName): Set[TypeName] = {
+    def findSubclasses(typeName: TypeName): Set[TypeSymbol] = {
       // Note: disable macros to prevent stack overflow caused by infinite typing loop!
       val tpe = c.typecheck(Ident(typeName), mode = c.TYPEmode, silent = true, withMacrosDisabled = true)
-      tpe.symbol.asClass.knownDirectSubclasses.map(_.asType.name)
+      tpe.symbol.asClass.knownDirectSubclasses.map(_.asType)
     }
 
-    def prisms(parentTypename: TypeName, childNames: Set[TypeName]): Set[Tree] = childNames.map { childName =>
-      val prismName = TermName(prefix + childName.decodedName.toString.toLowerCase)
-      q"""val $prismName =
-        monocle.macros.GenPrism.apply[$parentTypename, $childName]"""
+    def prisms(parentTypename: TypeName, childSymbols: Set[TypeSymbol]): Set[Tree] = {
+      val parentSymbol: TypeSymbol =
+        c.typecheck(Ident(parentTypename), mode = c.TYPEmode, silent = true, withMacrosDisabled = true)
+          .symbol
+          .asType
+      childSymbols.map { childSymbol =>
+        val prismName = TermName(prefix + childSymbol.name.decodedName.toString.toLowerCase)
+        q"""val $prismName = monocle.macros.GenPrism.apply[$parentSymbol, $childSymbol]"""
+      }
     }
 
     /*
