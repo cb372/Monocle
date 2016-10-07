@@ -40,7 +40,7 @@ private[macros] class PrismsImpl(val c: blackbox.Context) {
           .asType
       childSymbols.map { childSymbol =>
         val prismName = TermName(prefix + childSymbol.name.decodedName.toString.toLowerCase)
-        q"""val $prismName = monocle.macros.GenPrism.apply[$parentSymbol, $childSymbol]"""
+        q"""val $prismName = monocle.macros.GenPrism.apply[${parentSymbol.toType}, ${childSymbol.toType}]"""
       }
     }
 
