@@ -11,6 +11,7 @@ import sbtunidoc.Plugin.UnidocKeys._
 
 lazy val buildSettings = Seq(
   organization       := "com.github.julien-truffaut",
+  scalaOrganization  := "org.typelevel",
   scalaVersion       := "2.11.8",
   crossScalaVersions := Seq("2.10.6", "2.11.8"),
   scalacOptions     ++= Seq(
