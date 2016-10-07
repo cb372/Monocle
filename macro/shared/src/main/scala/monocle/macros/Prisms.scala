@@ -8,9 +8,9 @@ class Prisms(prefix: String = "") extends scala.annotation.StaticAnnotation {
 
 @macrocompat.bundle
 private[macros] class PrismsImpl(val c: blackbox.Context) {
+  import c.universe._
 
   def prismsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    import c.universe._
 
     // TODO this boilerplate is just to access the annotation's `prefix` argument. Isn't there an easier way?
     val prefix = c.macroApplication match {
@@ -30,7 +30,6 @@ private[macros] class PrismsImpl(val c: blackbox.Context) {
     def findSubclasses(typeName: TypeName): Set[TypeName] = {
       // Note: disable macros to prevent stack overflow caused by infinite typing loop!
       val tpe = c.typecheck(Ident(typeName), mode = c.TYPEmode, silent = true, withMacrosDisabled = true)
-
       tpe.symbol.asClass.knownDirectSubclasses.map(_.asType.name)
     }
 
@@ -97,8 +96,11 @@ private[macros] class PrismsImpl(val c: blackbox.Context) {
 
       case _ => c.abort(c.enclosingPosition, "Invalid annotation target: must be a sealed trait or sealed abstract class")
     }
+    println(showCode(result))
+    println(PrettyPrinting.prettyTree(c)(result))
 
     c.Expr[Any](result)
   }
+
 }
 
